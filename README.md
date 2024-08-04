@@ -1,0 +1,1 @@
+MCMCtree is a Bayesian MCMC program for estimation of species divergence times using molecular and trait data. MCMCtree was written by Ziheng Yang from University College London. This is a fork of MCMCtree version 4.9j with small modifications suitable for large-scale analyses. The latest version can be found in [PAML's repository](https://github.com/abacus-gene/paml).
