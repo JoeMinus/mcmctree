@@ -13,10 +13,23 @@ The first paper describes the MCMC algorith and the birth-death prior conditione
 
 * dos Reis M, Yang Z. 2011. **Approximate likelihood calculation for Bayesian estimation of divergence times**. _Molecular Biology and Evolution_, 28:2161-2172.
 
+## Installation
+
+To compile the program go into the `src/` directory and type `make` (this assumes you are in a Unix-type system and with build tools available). This will compile the `mcmctree` executable. If you're planning on running MCMCtree in a high-performance cluster, it may pay off to check if dedicated compilers are available for your cluster's architecture. For example, for Intel clusters, the Intel compiler may be available. In that case, you may want to set `CC = icc` and `CFLAGS = -fast` in the `Makefile`, then compile with `make` in the cluster. Our tests indicate the Intel-compiled version of MCMCtree is up to 2.5x faster than the GCC-compiled version.
+
+## Using the program
+
+MCMCtree is run in the command line, with program settings spcified in a control file, usually called `mcmctree.ctl`:
+
+```
+$ mcmctree mcmctree.ctl
+```
+
+A simple tutorial is available in the `tutorial/` folder. A book chapter on how to run MCMCtree using phylogenomic datasets is available at [github.com/mariodosreis/divtime](https://github.com/mariodosreis/divtime).
 
 ## Control file
 
-This sectiond describes settings in the control file for this version of MCMCtree which may behave slightly different than the main production version. Please do not assume compatibility.
+This sectiond describes settings in the control file for this version of MCMCtree which may behave slightly different than the main production version. Please do not assume compatibility with other versions.
 
 ```
 seed = -1
@@ -48,4 +61,4 @@ sampfreq = 6
 nsample = 5000
 ```
 
-**checkpoint** activates checkpointing. If `checkpoint = 1` the state of the MCMC chain will be saved to file `mcmctree.ckpt` every 10% percentile of the total MCMC run length. Burn-in is used as set in the control file and states during burn-in are not saved. If `checkpoint = 2`, the program will resume the MCMC chain from the `mcmctree.ckpt` file. In this case the `burnin` variable is ignored (i.e., is set to zero internally). The state of the chain is also saved every 10% percentile. This version of MCMCtree allows unlimited checkpoint runs, simply rename the `mcmc.txt` file once the run has finished and restart the MCMC chain. The varios MCMC files can then be merged into a larger file and process with `print = -1` in the control file. In short, use `checkpoint = 1` for the first run in which you need to use burn-in, then use `checkpoint = 2` for subsequent runs.
+**checkpoint** activates checkpointing. If `checkpoint = 1` the state of the MCMC chain will be saved to file `mcmctree.ckpt` every 10% percentile of the total MCMC run length. Burn-in is used as set in the control file and states during burn-in are not saved. If `checkpoint = 2`, the program will resume the MCMC chain from the `mcmctree.ckpt` file. In this case the `burnin` variable is ignored (i.e., is set to zero internally). The state of the chain is also saved every 10% percentile. Note in all cases `mcmctree.ckpt` is overwritten everytime the chain is saved, and thus only the last state saved is available. This version of MCMCtree allows unlimited checkpoint runs, simply rename the `mcmc.txt` file once the run has finished and restart the MCMC chain. The varios MCMC files can then be merged into a larger file and process with `print = -1` in the control file. In short, use `checkpoint = 1` for the first run in which you need to use burn-in, then use `checkpoint = 2` for subsequent runs.
