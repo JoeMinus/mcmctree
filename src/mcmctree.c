@@ -22,7 +22,7 @@
 #include "paml.h"
 
 
-#define NS            1025
+#define NS            1500
 #define NBRANCH      (NS*2-2)
 #define NNODE        (NS*2-1)
 #define MAXNSONS      3
@@ -30,7 +30,7 @@
 #define LSPNAME       100
 #define NCODE         64
 #define NCATG         50
-#define MaxNFossils   200
+#define MaxNFossils   300
 
 
 double(*rndSymmetrical)(void);
