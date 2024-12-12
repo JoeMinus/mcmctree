@@ -14,10 +14,9 @@
 #include <float.h>
 #include <time.h>
 #include <assert.h>
+#include <stdarg.h>
 
 #define square(a) ((a)*(a))
-#define FOR(i,n) for(i=0; i<n; i++)
-#define FPN(file) fputc('\n', file)
 #define F0 stdout
 #if !defined(MAX)
 #define MAX(a,b)                            (((a) > (b)) ? (a) : (b))
@@ -25,18 +24,16 @@
 #if !defined(MIN)
 #define MIN(a,b)                            (((a) < (b)) ? (a) : (b))
 #endif
-#define SQUARE(a)                           ((a)*(a))
 
 #define min2(a,b) ((a)<(b)?(a):(b))
 #define max2(a,b) ((a)>(b)?(a):(b))
 #define swap2(a,b,y) { y=a; a=b; b=y; }
 #define Pi  3.1415926535897932384626433832795
+#define X_STRING(x) #x
+#define X_C2S(x) X_STRING(x)
 
-#define beep putchar('\a')
-#define spaceming2(n) ((n)*((n)*2+9+2)*sizeof(double))
-
-int ReadSeq (FILE *fout, FILE *fseq, int cleandata, int locus);
-int ScanFastaFile(FILE *f, int *ns, int *ls, int *aligned);
+int ReadSeq (FILE* fout, FILE* fseq, int cleandata, int locus, int read_seq_only);
+int ScanFastaFile (FILE *f, int *ns, int *ls, int *aligned);
 void EncodeSeqs (void);
 void SetMapAmbiguity(int seqtype, int ModelAA2Codon);
 void ReadPatternFreq (FILE* fout, char* fpattf);
@@ -59,6 +56,7 @@ double reflect(double x, double a, double b);
 #define rndexp(mean) (-(mean)*log(rndu()))
 double rnduM0V1 (void);
 double rndNormal(void);
+int rndNp(double x[], int n, int p, double mx[], double vx[], int isvroot);
 int rndBinomial(int n, double p);
 double rndBox(void);
 double rndAirplane(void);
@@ -90,11 +88,14 @@ int AutodGamma (double Mmat[], double freqK[], double rK[], double *rho1, double
 double QuantileChi2 (double prob, double v);
 #define QuantileGamma(prob,alpha,beta) QuantileChi2(prob,2.0*(alpha))/(2.0*(beta))
 double  PDFGamma(double x, double alpha, double beta);
-#define CDFGamma(x,alpha,beta) IncompleteGamma((beta)*(x),alpha,LnGamma(alpha))
-double logPriorRatioGamma(double xnew, double xold, double a, double b);
+double logPDFGamma(double x, double alpha, double beta);
+#define CDFGamma(x,alpha,beta) IncompleteGamma((beta)*(x),alpha,lgamma(alpha))
+double logPDFGammaRatio(double xnew, double xold, double a, double b);
 double  PDFinvGamma(double x, double alpha, double beta);
 #define CDFinvGamma(x,alpha,beta) (1-CDFGamma(1/(x),alpha,beta))
 #define CDFChi2(x,v) CDFGamma(x,(v)/2.0,0.5)
+double logPriorRatioBeta(double xnew, double x, double p, double q);
+double logPDFBeta(double x, double p, double q);
 double PDFBeta(double x, double p, double q);
 double CDFBeta(double x, double p, double q, double lnbeta);
 double QuantileBeta(double prob, double p, double q, double lnbeta);
@@ -118,7 +119,7 @@ double logPDFSkewN(double x, double loc, double scale, double shape);
 int StirlingS2(int n, int k);
 double lnStirlingS2(int n, int k);
 double LnGamma(double alpha);
-#define LnBeta(p,q) (LnGamma(p) + LnGamma(q) - LnGamma(p+q))
+#define LnBeta(p,q) (lgamma(p) + lgamma(q) - lgamma(p+q))
 double DFGamma(double x, double alpha, double beta);
 double IncompleteGamma (double x, double alpha, double ln_gamma_alpha);
 #define CDFBinormal(h,k,r)  LBinormal(-(h),-(k),r)   /* CDF for bivariate normal */
@@ -146,13 +147,13 @@ int RemoveIndel(void);
 int f_mono_di (FILE *fout, char z[], int ls, int iring, double fb1[], double fb2[], double CondP[]);
 int PickExtreme (FILE *fout, char z[], int ls, int iring, int lfrag, int ffrag[]);
 
-int print1seq (FILE*fout, unsigned char *z, int ls, int pose[]);
-void printSeqs(FILE *fout, unsigned char *z[], unsigned char *spnames[], int ns, int ls, int npatt, double fpatt[], int *pose, char keep[], int format);
+int print1seq (FILE*fout, char *z, int ls, int pose[]);
+void printSeqs(FILE *fout, char *z[], char *spnames[], int ns, int ls, int npatt, double fpatt[], int *pose, char keep[], int format);
 int printPatterns(FILE *fout);
 void printSeqsMgenes (void);
-int printsma (FILE*fout, char*spname[], unsigned char*z[], int ns, int l, int lline, int gap, int seqtype, 
+int printsma (FILE*fout, char*spname[], char*z[], int ns, int l, int lline, int gap, int seqtype, 
     int transformed, int simple, int pose[]);
-int printsmaCodon (FILE *fout, unsigned char * z[], int ns, int ls, int lline, int simple);
+int printsmaCodon (FILE *fout, char * z[], int ns, int ls, int lline, int simple);
 int zztox ( int n31, int l, char z1[], char z2[], double *x );
 int testXMat (double x[]);
 double SeqDivergence (double x[], int model, double alpha, double *kapa);
@@ -180,7 +181,7 @@ int  setmark_61_64 (void);
 int BootstrapSeq (char* seqfilename);
 int rell(FILE*flnf, FILE*fout, int ntree);
 int print1site (FILE*fout, int h);
-int MultipleGenes (FILE* fout, FILE*fpair[], double space[]);
+int MultipleGenes (FILE* fout, FILE* ftree, FILE*fpair[], double space[]);
 int lfunRates (FILE* fout, double x[], int np);
 int AncestralSeqs (FILE *fout, double x[]);
 void ListAncestSeq(FILE *fout, char *zanc);
@@ -203,10 +204,10 @@ void sleep2(int wait);
 char *strc (int n, int c);
 int printdouble(FILE*fout, double a);
 void strcase (char *str, int direction);
-void error2(char * message);
+void zerror(const char* format, ...);
 int  indexing(double x[], int n, int index[], int descending, int space[]);
 int binarysearch (const void *key, const void *base, size_t n, size_t size, int(*compare)(const void *, const void *), int *found);
-FILE *gfopen(char *filename, char *mode);
+FILE *zopen(char *filename, char *mode);
 int  appendfile(FILE*fout, char*filename);
 
 int zero (double x[], int n);
@@ -229,8 +230,8 @@ int matout (FILE *file, double x[], int n, int m);
 int matout2 (FILE *fout, double x[], int n, int m, int wid, int deci);
 int mattransp1 (double x[], int n);
 int mattransp2 (double x[], double y[], int n, int m);
-int matinv (double x[], int n, int m, double space[]);
-int matexp (double A[], int n, int nTaylorTerms, int nSquares, double space[]);
+int matinv(double x[], int n, int m, double *det, double space[]);
+int matexp(double A[], int n, int nTaylorTerms, int nSquares, double space[]);
 #ifdef USE_GSL
 int matexpGSL (double A[], int n, double space[]);
 #endif
@@ -322,7 +323,7 @@ int RandomLHistory (int rooted, double space[]);
 
 void Tree2Partition (char partition[]);
 int Partition2Tree (char splits[], int lsplit, int ns, int nsplit, double label[]);
-void CladeSupport (FILE *fout, char treef[], int getSnames, char mastertreef[], int pick1tree);
+void CladeSupport (FILE *fout, char treef[], int getSnames, char maintreef[], int pick1tree);
 int GetNSfromTreeFile(FILE *ftree, int *ns, int *ntree);
 int NSameBranch (char partition1[],char partition2[], int nib1,int nib2, int IBsame[]);
 
@@ -368,22 +369,16 @@ int UseLocus (int locus, int copyconP, int setmodel, int setSeqName);
 int GetGtree(int locus);
 int printGtree(int printBlength);
 
-void copySptree(void);
-void printSptree(void);
-
-
-enum {BASEseq=0, CODONseq, AAseq, CODON2AAseq, BINARYseq, BASE5seq} SeqTypes;
-
-enum {PrBranch=1, PrNodeNum=2, PrLabel=4, PrNodeStr=8, PrAge=16, PrOmega=32} OutTreeOptions;
+enum DataType {BASEseq = 0, CODONseq = 1, AAseq = 2, CODON2AAseq = 3, BINARYseq = 4, BASE5seq = 5};
+enum PrintOptions { PrBranch = 1, PrNodeNum = 2, PrLabel = 4, PrNodeStr = 8, PrAge = 16, PrOmega = 32 };
 
 
 /* use mean (0; default) for discrete gamma instead of median (1) */
 #define DGammaUseMedian 0
 
-
 #define FAST_RANDOM_NUMBER
 
-#define mBactrian  0.95
+#define mBactrian  0.90
 #define sBactrian  sqrt(1 - mBactrian*mBactrian)
 #define aBox 0.5
 #define bBox (sqrt(12 - 3*aBox*aBox) - aBox) / 2
@@ -394,6 +389,6 @@ enum {PrBranch=1, PrNodeNum=2, PrLabel=4, PrNodeStr=8, PrAge=16, PrOmega=32} Out
 
 #define PAML_RELEASE      0
 
-#define pamlVerStr "paml version 4.9j, February 2020"
+#define pamlVerStr "paml version 4.10.8, November 2024"
 
 #endif
