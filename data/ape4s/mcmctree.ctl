@@ -23,4 +23,4 @@ sigma2_gamma = 1 10  * gamma prior for sigma^2 (for clock=2 or 3)
 print = 1
 burnin = 4000
 sampfreq = 6
-nsample = 100000
+nsample = 10000
