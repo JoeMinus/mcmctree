@@ -1,19 +1,15 @@
-# MCMCtree forked
+# MCMCtree 4.9j-forked
 
-MCMCtree is a Bayesian MCMC program for estimation of species divergence times using molecular and trait data. MCMCtree was written by Ziheng Yang from University College London. This is a fork of MCMCtree with small modifications suitable for large-scale analyses. Note this version may lag behind Ziheng's official version. The latest version can be found in [PAML's repository](https://github.com/abacus-gene/paml).
+MCMCtree is a Bayesian MCMC program for estimation of species divergence times using molecular and trait data. MCMCtree was written by Ziheng Yang from University College London. This is a fork of MCMCtree version 4.9j with small modifications suitable for large-scale analyses. The latest version can be found in [PAML's repository](https://github.com/abacus-gene/paml).
 
 ## Citation
 
-If you use this version of MCMCtree in your publications, please indicate this as "MCMCtree forked version [VERSIONNUMBER] available at https://github.com/dosreislab/mcmctree. 
-
-General citations for MCMCtree are:
+If you use this version of MCMCtree in your publications, please indicate so as MCMCtree version 4.9j-forked (available at https://github.com/dosreislab/mcmctree). General citations for MCMCtree are:
 
 * Yang, Z., and B. Rannala. 2006. **Bayesian estimation of species divergence times under a molecular clock using multiple fossil calibrations with soft bounds**. _Molecular Biology and Evolution_, 23: 212–226.
 * Rannala B, Yang Z. 2007. **Inferring speciation times under an episodic molecular clock**. _Systematic Biology_, 56: 453-466. 
 
-The first paper describes the MCMC algorith and the birth-death prior conditioned on soft fossil calibrations. The second paper describes the relaxed clock implementation.
-
-If you use the approximate likelihood method please cite:
+The first paper describes the MCMC algorith and the birth-death prior conditioned on soft fossil calibrations. The second paper describes the relaxed clock implementation. If you use the approximate likelihood method please cite:
 
 * dos Reis M, Yang Z. 2011. **Approximate likelihood calculation for Bayesian estimation of divergence times**. _Molecular Biology and Evolution_, 28:2161-2172.
 
