@@ -1,5 +1,6 @@
 # Test 4 ape species using HKY+gamma, strict clock and exact likelihood.
 # rm(list=ls())
+if (!exists("mcmctree")) mcmctree <- "mcmctree"
 test_name <-  "4s-hky-gamma-exact-lhk"
 cat("Testing:", test_name, "\n")
 test_dir <- getwd() # This should be Rtest
@@ -21,7 +22,7 @@ file.copy("../data/ape4s/mcmctree.ctl", tmp_dir)
 
 # go into tmp directory and run mcmctree:
 setwd(tmp_dir)
-system("mcmctree")
+system(mcmctree)
 mcmc <- read.table("mcmc.txt", head=TRUE)
 mcmc.means <- apply(mcmc[,-1], 2, mean)
 seed <- scan("SeedUsed")
@@ -39,14 +40,18 @@ if (FALSE) {
 rel.err <- abs( benchmk - mcmc.means ) / mcmc.means
 
 # Tolerance threshold to trigger error:
-thr <- 0.01
+thr0 <- 0.01
+thr1 <- 0.05
 
-# Print seed to screen so any errors can be reproduced:
+# Print executable and seed used to screen so any errors can be reproduced:
+cat("Test: MCMCtree executable was ", mcmctree, "\n")
 cat("Test:", test_name, "seed used was", seed, "\n")
 
 # The moment of truth:
-if (any(rel.err > thr)) {
-  cat("Test:", test_name, "failed!\n")
+if (any(rel.err > thr0)) {
+  cat("Test:", test_name, "failed with threshold 0!\n")
+} else if (any(rel.err > thr1)){
+  cat("Test:", test_name, "failed with threshold 1!\n")
 } else {
   cat("Test:", test_name, "successful!\n")
 }
