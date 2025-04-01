@@ -1,6 +1,7 @@
 # Run all tests
 # All test scripts must be named test-*.R
 
+if (!exists("mcmctree")) mcmctree <- "mcmctree"
 test_dir <- getwd() # This must be Rtest/
 test_files <- dir(".", pattern=glob2rx("test-*.R"))
 

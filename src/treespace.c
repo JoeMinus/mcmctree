@@ -2,7 +2,6 @@
    collection of tree perturbation routines
 */
 
-#include "paml.h"
 
 int MakeTreeIb(int ns, int Ib[], int rooted)
 {
@@ -58,8 +57,10 @@ int GetTreeI(int itree, int ns, int rooted)
    else            for (i = 0; i < nM; i++) { Ib[i] = itree / M[i]; itree %= M[i]; }
    /*
       if (noisy>3) {
-         FOR (i, nM) printf ("%5d ", M[i]);   FPN (F0);
-         FOR (i, nM) printf ("%5d ", Ib[i]);  FPN (F0);
+         for(i=0; i < nM; i++) printf ("%5d ", M[i]);
+         printf("\n");
+         for(i=0; i < nM; i++) printf ("%5d ", Ib[i]);
+         printf("\n");
       }
    */
    MakeTreeIb(ns, Ib, rooted);
@@ -76,7 +77,7 @@ int CountLHsTree(void)
    double y = 0;
 
    for (i = com.ns; i < tree.nnode; i++)
-      if (nodes[i].nson != 2) error2("this works for rooted trees only");
+      if (nodes[i].nson != 2) zerror("this works for rooted trees only");
    for (i = com.ns; i < tree.nnode; i++)
       nLR[i - com.ns][0] = nLR[i - com.ns][1] = -1;
    for (k = 0; k < com.ns; k++) {
@@ -101,10 +102,10 @@ int CountLHsTree(void)
       printf("\nnode %2d (%2d %2d): %2d %2d ", i+com.ns, nodes[i+com.ns].sons[0], nodes[i+com.ns].sons[1], nLR[i][0], nLR[i][1]);
       */
       if (nLR[i][0] == -1 || nLR[i][1] == -1)
-         error2("nLR = -1");
+         zerror("nLR = -1");
       if (nLR[i][0] && nLR[i][1]) {
          nLH *= (int)Binomial((double)(nLR[i][0] + nLR[i][1]), min2(nLR[i][0], nLR[i][1]), &y);
-         if (y) error2("y!=0 not considered");
+         if (y) zerror("y!=0 not considered");
       }
    }
    return(nLH);
@@ -149,7 +150,7 @@ int ListTrees(FILE* fout, int ns, int rooted)
       }
       if (finish) break;
    }
-   FPN(fout);
+   fprintf(fout, "\n");
 
    return (0);
 }
@@ -168,8 +169,8 @@ int GetIofTree(int rooted, int keeptree, double space[])
    char ns2 = (char)(com.ns - 2), *bA = (char*)space;  /* bA[b*ns2+j]: ancestors on branch b */
    struct TREEB tree0 = tree;
 
-   if (tree.nnode - com.ns != com.ns - 1 - !rooted) error2("GetIofTree");
-   if (com.ns > 15) error2("ns too large in GetIofTree");
+   if (tree.nnode - com.ns != com.ns - 1 - !rooted) zerror("GetIofTree");
+   if (com.ns > 15) zerror("ns too large in GetIofTree");
 
    /* find new root.
       Ib[]: No. of times inner nodes are visited on paths 1-2, 1-3, 2-3 */
@@ -219,7 +220,7 @@ int GetIofTree(int rooted, int keeptree, double space[])
       a1 = nodes[k = tree0.root].sons[0];  a2 = nodes[tree0.root].sons[1];
       if (nodes[a1].father == k)      k = a1;
       else if (nodes[a2].father == k) k = a2;
-      else error2("rooooot");
+      else zerror("rooooot");
       for (b = 0; b < tree.nbranch; b++) if (tree.branches[b][1] == k) break;
       Ib[nM - 1] = b;
    }
@@ -293,7 +294,7 @@ int NeighborNNI(int i_tree)
    int i, a, b, c, d, ib = i_tree / 2, ip = i_tree % 2;
 
    if (tree.nbranch != com.ns * 2 - 2 - (nodes[tree.root].nson == 3))
-      error2("err NeighborNNI: multificating tree.");
+      zerror("err NeighborNNI: multificating tree.");
 
    /* locate a,b,c,d */
    for (i = 0, a = 0; i < tree.nbranch; i++)
@@ -325,7 +326,8 @@ int GetLHistoryI(int iLH)
 
    tree.nnode = com.ns * 2 - 1;
    for (i = 0; i < tree.nnode; i++) {
-      nodes[i].father = nodes[i].nson = -1;  FOR(k, com.ns) nodes[i].sons[k] = -1;
+      nodes[i].father = nodes[i].nson = -1;  
+      for (k = 0; k < com.ns; k++)  nodes[i].sons[k] = -1;
    }
    for (i = 0, inode = com.ns; i < com.ns; i++) nodea[i] = i;
    for (i = com.ns, it = iLH; i >= 2; i--) {
@@ -354,17 +356,22 @@ int GetIofLHistory(void)
       node d corresponds to time 2*ns-2-d; tree.root=ns*2-2;
       t0=1 > t1 > t2 > ... > t[ns-2]
    */
-   int index, i, j, k[NS + 1], inode, nnode, nodea[NS], s[2];
+   int index, i, j, k[NS + 1], inode, nnode, nodea[NS], s[2] = {0}, t;
 
    if (nodes[tree.root].nson != 2 || tree.nnode != com.ns * 2 - 1
-      || tree.root != com.ns * 2 - 2)  error2("IofLH");
+      || tree.root != com.ns * 2 - 2)  zerror("IofLH");
    for (i = 0; i < com.ns; i++) nodea[i] = i;
    for (inode = nnode = com.ns, index = 0; inode < com.ns * 2 - 1; inode++, nnode--) {
-      FOR(i, 2) FOR(j, nnode)
-         if (nodes[inode].sons[i] == nodea[j]) { s[i] = j; break; }
-      k[nnode] = max2(s[0], s[1]); s[0] = min2(s[0], s[1]); s[1] = k[nnode];
+      for (i = 0; i < 2; i++) 
+         for(j=0; j< nnode; j++)
+            if (nodes[inode].sons[i] == nodea[j]) 
+               { s[i] = j; break; }
+      t = max2(s[0], s[1]);
+      s[0] = min2(s[0], s[1]);
+      s[1] = t;
       k[nnode] = s[1] * (s[1] - 1) / 2 + s[0];
-      nodea[s[0]] = inode; nodea[s[1]] = nodea[nnode - 1];
+      nodea[s[0]] = inode;
+      nodea[s[1]] = nodea[nnode - 1];
    }
    for (nnode = 2, index = 0; nnode <= com.ns; nnode++)
       index = nnode*(nnode - 1) / 2 * index + k[nnode];
@@ -387,13 +394,16 @@ int ReorderNodes(char LHistory[])
       tree.root = com.ns * 2 - 2;
       /*      printf("\nRoot changed to %d in ReorderNodes..\n", com.ns*2-2+1); */
    }
-   FOR(i, tree.nbranch) FOR(j, 2)
-      if (tree.branches[i][j] >= com.ns)
-         FOR(k, com.ns - 1)
-         if (tree.branches[i][j] == LHistory[k])
-         {
-            tree.branches[i][j] = com.ns * 2 - 2 - k;  break;
-         }
+   for (i = 0; i < tree.nbranch; i++) {
+      for (j = 0; j < 2; j++) {
+         if (tree.branches[i][j] >= com.ns)
+            for (k = 0; k < com.ns - 1; k++)
+               if (tree.branches[i][j] == LHistory[k]) {
+                  tree.branches[i][j] = com.ns * 2 - 2 - k;
+                  break;
+               }
+      }
+   }
    BranchToNode();
 
    return (0);
