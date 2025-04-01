@@ -19,7 +19,7 @@ If you use the approximate likelihood method please cite:
 
 ## Installation
 
-To compile the program go into the `src/` directory and type `make` (this assumes you are in a Unix-type system and with build tools available). This will compile the `mcmctree` executable. If you're planning on running MCMCtree in a high-performance cluster, it may pay off to check if dedicated compilers are available for your cluster's architecture. For example, for Intel clusters, the Intel compiler may be available. In that case, you may want to set `CC = icc` and `CFLAGS = -fast` in the `Makefile`, then compile with `make` in the cluster. Our tests indicate the Intel-compiled version of MCMCtree is up to 2.5x faster than the GCC-compiled version.
+To compile the program go into the `src/` directory and type `make` (this assumes you are in a Unix-type system and with build tools available). This will compile the `mcmctree` executable. If you're planning on running MCMCtree in a high-performance cluster, it may pay off to check if dedicated compilers are available for your cluster's architecture. For example, for Intel clusters, the Intel compiler may be available. In that case, you may want to set `CC = icx` and `CFLAGS = -fast` in the `Makefile`, then compile with `make` in the cluster. Our tests indicate the Intel-compiled version of MCMCtree is up to 2.5x faster than the GCC-compiled version.
 
 ## Using the program
 
