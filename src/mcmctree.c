@@ -4278,7 +4278,7 @@ int MCMC(FILE* fout)
       }
       
       /* save MCMC state */
-      if (com.checkpoint > 1 && k > 100 && ir > 0
+      if (com.checkpoint >= 1 && k > 100 && ir > 0
          && (ir + 1) % (int)(k * com.checkpointp) == 0)
          SaveMCMCstate(com.checkpointf, ir, data.lnpR, lnL);
    }  /* for(ir) */
